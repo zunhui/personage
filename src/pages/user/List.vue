@@ -1,113 +1,115 @@
 <template>
-  <div class="arttcle">
-    <!-- 按钮 -->
+  <!-- 用户管理 -->
+  <div class="user_list">
     <div class="btns">
       <el-button type="danger" size="small" @click="toBatchDenete">批量删除</el-button>
     </div>
-    <!-- 表格 -->
-    <el-table :data="users" style="width: 100%" @selection-change="handleSelectionChange">
+    <el-table :data="users" size="small" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="id" label="编号" ></el-table-column>
       <el-table-column prop="username" label="用户名"></el-table-column>
-      <el-table-column prop="password" label="密码"></el-table-column>
-      <el-table-column prop="realname" label="真实姓名"></el-table-column>
+      <el-table-column prop="realname" label="姓名"></el-table-column>
       <el-table-column prop="gender" label="性别"></el-table-column>
-      <el-table-column prop="telephone" label="电话"></el-table-column>
+      <el-table-column prop="telephone" label="手机号"></el-table-column>
       <el-table-column prop="status" label="状态"></el-table-column>
-      <el-table-column fixed="right" label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="180">
         <template slot-scope="scope">
-          <el-button @click="toDelete(scope.row.id)" type="text" size="small">删除</el-button>
-          <el-button @click="toEdit(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="toRole(scope.row)" type="text" size="small">设置</el-button>
+          <el-button type="text" size="small" @click="deleteHandler(scope.row.id)">移除</el-button>
+          <el-button type="text" size="small" @click="toDetails(scope.row.id)">详情</el-button>
+          <el-button type="text" size="small" @click="toEdit(scope.row)">修改</el-button>
+          <el-button type="text" size="small" @click="toSetRole(scope.row)">设置</el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog title="修改用户信息" :visible.sync="dialogFormVisible">
+    <el-dialog :title="title" :visible.sync="visible">
       <el-form :model="form">
         <el-form-item label="用户名" label-width="80px">
           <el-input v-model="form.username" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="姓名" label-width="80px">
+          <el-input v-model="form.realname" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="密码" label-width="80px">
           <el-input v-model="form.password" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="真实姓名" label-width="80px">
-          <el-input v-model="form.realname" autocomplete="off"></el-input>
-        </el-form-item>
         <el-form-item label="性别" label-width="80px">
-          <el-input v-model="form.gender" autocomplete="off"></el-input>
+          <el-radio-group v-model="form.gender">
+            <el-radio label="男">男</el-radio>
+            <el-radio label="女">女</el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="电话" label-width="80px">
+        <el-form-item label="手机号" label-width="80px">
           <el-input v-model="form.telephone" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="状态" label-width="80px">
-          <el-input v-model="form.status" autocomplete="off"></el-input>
+        <el-form-item label="出生日期" label-width="80px">
+          <el-date-picker value-format="timestamp" v-model="form.birth" type="date" placeholder="选择日期"> </el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">取 消</el-button>
-        <el-button size="small" type="primary" @click="submitHandler">确 定</el-button>
+        <el-button @click="visible = false" size="small">取 消</el-button>
+        <el-button type="primary" size="small" @click="saveUserHandler">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- /模态框 -->
     <!-- 角色模态框 -->
-    <el-dialog title="设置角色" :visible.sync="centerDialogVisible" width="30%" center>
-        <div>
-         <el-form ref="form" :model="user" label-width="80px">
-           {{user.roles}}
-            <el-form-item label="用户名">
-              {{user.realname}}
-            </el-form-item>
-            <el-form-item label="角色" label-width="80px">
-              <el-cascader v-model="user.roles" :options="roles" :props="props" clearable></el-cascader>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="onSubmit">确认</el-button>
-                <el-button @click="centerDialogVisible=false">取消</el-button>
-            </el-form-item>
-            </el-form>
-        </div> 
+    <el-dialog title="设置角色" :visible.sync="role_visible">
+      <el-form :model="user">
+        <el-form-item label="用户名" label-width="80px">
+          {{user.realname}}
+        </el-form-item>
+        <el-form-item label="角色" label-width="80px">
+          <el-cascader v-model="user.roles" :options="roles" :props="props" clearable></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="role_visible = false" size="small">取 消</el-button>
+        <el-button type="primary" size="small" @click="setRolesHandler">确 定</el-button>
+      </div>
     </el-dialog>
+    <!-- /模态框 -->
   </div>
 </template>
 <script>
-import request from "@/utils/request";
+import request from '@/utils/request'
+import qs from 'querystring'
 export default {
-  //提供数据
-  data() {
+  data(){
     return {
-      dialogFormVisible: false,
-      centerDialogVisible:false,
-      form: {},
-      user:[],
-      users: [],
-      ids: [],
+      form:{},
+      visible:false,
+      role_visible:false,
+      title:'添加用户',
+      user:{},
+      users:[],
       roles:[],
+      ids: [],
       props: { multiple: true ,value:'id',label:'name',emitPath:false},
-    };
+    }
   },
-  // 生命周期
-  created() {
-    this.reloadData();
+  created(){
+    this.loadUsers();
     this.loadRoles();
   },
-  //方法，事件处理函数
-  methods: {
+  methods:{
     loadRoles(){
       request.get("/role/findAll")
       .then(response => {
         this.roles = response.data;
       })
     },
-    toRole(record){
-      this.centerDialogVisible=true,
-      this.user=record
+    saveUserHandler(){
+      request.post('/user/updateUser',this.form).then(response=>{
+        this.visible = false;
+        this.$message({message:response.message,type:'success'});
+        this.loadUsers();
+      })
     },
+      //批量删除
     handleSelectionChange(val) {
       this.ids = val.map(item => item.id);
     },
-    //批量删除
     toBatchDenete() {
-      this.$confirm("此操作将永久删除选中用户, 是否继续?", "提示", {
+    this.$confirm("此操作将永久删除选中用户, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -124,54 +126,58 @@ export default {
         });
       });
     },
-    submitHandler() {
-      let url = "/user/updateUser";
-      request.post(url, this.form).then(response => {
-        //提示
-        // 通知
-        this.$message({
-          message: response.message,
-          type: "success"
-        });
-        //关闭模态框
-        this.dialogFormVisible = false;
-        //重新载入
-        this.reloadData();
-      });
+    loadUsers(){
+      request.get("/user/findExtendAll")
+      .then(response => {
+        response.data.forEach(item =>{
+          item.roles = item.roles.map(r => r.id)
+        })
+        this.users = response.data;
+      })
     },
-    reloadData() {
-      //调用ajax查询文章
-      request.get("user/findExtendAll").then(result => {
-        this.users = result.data;
-      });
-    },
-    toEdit(record) {
-      //跳转到编辑页面
-      this.dialogFormVisible = true;
-      //回显数据 给form赋值
-      this.form = record;
-    },
-    toDelete(id) {
-      this.$confirm("此操作将永久删除该用户, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
+    deleteHandler(id){
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(() => {
-        // 交互
-        let url = "/user/deleteById";
-        request.get(url, { params: { id } }).then(response => {
-          // 通知
-          this.$message({
-            message: response.message,
-            type: "success"
-          });
-          // 重载数据
-          this.reloadData();
-        });
-      });
+        request.get("/user/deleteById?id="+id)
+        .then(response=>{
+          this.$message({ type: 'success', message:response.message });
+          this.loadRoles();
+        })
+      })
     },
+    toEdit(record){
+      this.form = record;
+      this.visible = true;
+    },
+    toSetRole(record){
+      // 初始化角色
+      // record.roles = [];
+      this.user = record;
+      this.role_visible = true;
+    },
+    toDetails(){
+    },
+    setRolesHandler(){
+      request.request({
+        url:'/user/setRoles',
+        method:'post',
+        headers:{
+          'Content-Type':'application/x-www-form-urlencoded'
+        },
+        data:qs.stringify({
+          id:this.user.id,
+          roles:this.user.roles
+        })
+      })
+      .then(response=>{
+        this.role_visible = false;
+        this.$message({message:response.message,type:'success'});
+        this.loadUsers();
+      })
+    }
   }
-};
+}
 </script>
-<style scoped>
-</style>

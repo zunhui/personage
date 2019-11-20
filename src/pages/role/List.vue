@@ -70,7 +70,7 @@ export default {
   methods:{
     authorizationHandler(){
       request.request({
-        url:'/role/authorization',
+        url:'/role/setRolePrivilege',
         method:'post',
         headers:{
           'Content-Type':'application/x-www-form-urlencoded'
@@ -131,9 +131,8 @@ export default {
       })
     },
     toAuthorization(record){
-      console.log(record);
-      this.role = record;
       this.authorization_visible = true;
+      this.role = record;
     }
   }
 }
