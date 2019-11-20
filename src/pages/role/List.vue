@@ -76,6 +76,7 @@ export default {
           'Content-Type':'application/x-www-form-urlencoded'
         },
         data:qs.stringify(this.role)
+        
       })
       .then(response=>{
         this.authorization_visible = false;

@@ -159,6 +159,7 @@ export default {
       this.role_visible = true;
     },
     toDetails(){
+      
     },
     setRolesHandler(){
       request.request({
