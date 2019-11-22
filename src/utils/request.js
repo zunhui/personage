@@ -19,7 +19,8 @@ service.interceptors.request.use(
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
+      //config.headers['X-Token'] = getToken()
+      config.headers['Authorization'] = getToken()
     }
     return config
   },
@@ -44,14 +45,16 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     if(res.status!==200){
-      Message({
-        message: res.message,
-        type: 'error',
-        duration: 5 * 1000
-      })
-      return Promise.reject(res)
-    }
+      // 消息弹框
+      Message({ message: res.message, type: 'error', duration: 5 * 1000 })
+      if(res.status === 401){
+        logout();
+      }
+      // 返回承诺失败对象
+      return Promise.reject(new Error(res.message || 'Error'))
+    } else {
       return res
+    }
   },
   error => {
     console.log('err' + error) // for debug
