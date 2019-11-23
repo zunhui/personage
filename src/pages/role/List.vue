@@ -29,7 +29,6 @@
     <!-- 授权模态框 -->
     <el-dialog title="授权" :visible.sync="authorization_visible">
       <el-form :model="role">
-        {{role}}
         <el-form-item label="角色名称" label-width="80px">
           {{role.name}}
         </el-form-item>

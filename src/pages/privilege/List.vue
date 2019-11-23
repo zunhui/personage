@@ -18,7 +18,6 @@
     </el-table>
     <!-- 模态框 -->
     <el-dialog :title="title" :visible.sync="visible">
-      {{form}}
       <el-form :model="form">
         <el-form-item label="名称" label-width="80px">
           <el-input v-model="form.name" autocomplete="off"></el-input>

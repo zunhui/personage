@@ -21,7 +21,6 @@
     </el-table>
     <!-- 模态框 -->
     <el-dialog title="新增栏目信息" :visible.sync="dialogFormVisible">
-      {{form}}
       <el-form :model="form">
         <el-form-item label="栏目名称" label-width="80px">
           <el-input v-model="form.name" autocomplete="off"></el-input>
